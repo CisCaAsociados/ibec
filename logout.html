@@ -1,7 +1,30 @@
-<?php
-// logout.php
-session_start();
-session_destroy();
-header("Location: login.php");
-exit;
-?>
+<!-- logout.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cerrando sesión...</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+        firebase.initializeApp(firebaseConfig);
+        firebase.auth().signOut().then(() => {
+            window.location.href = "index.html";
+        }).catch((error) => {
+            console.error("Error al cerrar sesión:", error);
+            alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
+            window.location.href = "index.html";
+        });
+    </script>
+</head>
+<body>
+    <p>Cerrando sesión...</p>
+</body>
+</html>
