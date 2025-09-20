@@ -143,67 +143,96 @@
             }
         });
 
-        function generarMenu(rol) {
-            const menu = document.getElementById('menu-dinamico');
-            let html = `
-                <li class="nav-item">
-                    <a class="nav-link active" href="inicio.html">
-                        <i class="bi bi-journal-text"></i> Inicio
-                    </a>
-                </li>
-            `;
+       function generarMenu(rol) {
+    const menu = document.getElementById('menu-dinamico');
+    let html = `
+        <li class="nav-item">
+            <a class="nav-link active" href="inicio.html">
+                <i class="bi bi-journal-text"></i> Inicio
+            </a>
+        </li>
+    `;
 
-            if (rol === 'admin') {
-                // Admin ve TODO
-                html += `
-                    <li class="nav-item">
-                        <a class="nav-link" href="asignaturas/gestionar.html">
-                            <i class="bi bi-book"></i> Gestionar Asignaturas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="grupos/crear.html">
-                            <i class="bi bi-people-fill"></i> Gestionar Grupos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="matriculas/gestionar.html">
-                            <i class="bi bi-pencil-square"></i> Gestionar Matrículas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../estudiantes/inicio.html">
-                            <i class="bi bi-mortarboard"></i> Gestionar Estudiantes
-                        </a>
-                    </li>
-                `;
-            } else if (rol === 'admin_academico') {
-                // Admin Académico SOLO ve Gestionar Matrículas en el menú lateral
-                html += `
-                    <li class="nav-item">
-                        <a class="nav-link" href="matriculas/gestionar.html">
-                            <i class="bi bi-pencil-square"></i> Gestionar Matrículas
-                        </a>
-                    </li>
-                `;
-            }
+    if (rol === 'admin') {
+        // Admin ve TODO
+        html += `
+            <li class="nav-item">
+                <a class="nav-link" href="asignaturas/gestionar.html">
+                    <i class="bi bi-book"></i> Gestionar Asignaturas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="grupos/crear.html">
+                    <i class="bi bi-people-fill"></i> Gestionar Grupos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="matriculas/gestionar.html">
+                    <i class="bi bi-pencil-square"></i> Gestionar Matrículas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../../estudiantes/inicio.html">
+                    <i class="bi bi-mortarboard"></i> Gestionar Estudiantes
+                </a>
+            </li>
+        `;
+    } else if (rol === 'admin_academico') {
+        // Admin Académico ve TODOS los enlaces de su área
+        html += `
+            <li class="nav-item">
+                <a class="nav-link" href="matriculas/gestionar.html">
+                    <i class="bi bi-pencil-square"></i> Gestionar Matrículas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../../estudiantes/inicio.html">
+                    <i class="bi bi-mortarboard"></i> Gestionar Estudiantes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="pagos/gestionar.html">
+                    <i class="bi bi-credit-card"></i> Gestión de Pagos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="notas/ingresar.html">
+                    <i class="bi bi-clipboard2-check"></i> Gestión de Notas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="asistencias/tomar.html">
+                    <i class="bi bi-check-circle"></i> Gestión de Asistencias
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0)" onclick="alert('Reporte de Notas - En desarrollo')">
+                    <i class="bi bi-graph-up"></i> Reporte de Notas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0)" onclick="alert('Reporte de Asistencias - En desarrollo')">
+                    <i class="bi bi-file-earmark-bar-graph"></i> Reporte de Asistencias
+                </a>
+            </li>
+        `;
+    }
 
-            html += `
-                <li class="nav-item mt-4">
-                    <a class="nav-link text-warning" href="../../dashboard.html">
-                        <i class="bi bi-arrow-left"></i> Volver al Panel
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-danger" href="../../logout.html">
-                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                    </a>
-                </li>
-            `;
+    html += `
+        <li class="nav-item mt-4">
+            <a class="nav-link text-warning" href="../../dashboard.html">
+                <i class="bi bi-arrow-left"></i> Volver al Panel
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="../../logout.html">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+        </li>
+    `;
 
-            menu.innerHTML = html;
-        }
-
+    menu.innerHTML = html;
+}
         function generarContenido(nombres, apellidos, rol) {
             let contenido = `
                 <!-- Título principal -->
