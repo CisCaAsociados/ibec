@@ -44,7 +44,7 @@
     <!-- Contenedor principal -->
     <div class="container-fluid">
         <div class="row">
-            <!-- Menú Lateral (se generará dinámicamente) -->
+            <!-- Menú Lateral -->
             <nav id="sidebar" class="col-md-3 col-lg-2 sidebar">
                 <div class="position-sticky pt-3">
                     <h5 class="text-white text-center py-3 border-bottom">Académico</h5>
@@ -59,7 +59,7 @@
                 <!-- Mensaje de verificación o error -->
                 <div id="mensaje-verificacion"></div>
 
-                <!-- Aquí se cargará el contenido dinámico -->
+                <!-- Contenido dinámico -->
                 <div id="contenido-dinamico">
                     <p class="text-muted">Verificando permisos...</p>
                 </div>
@@ -100,13 +100,11 @@
         // Verificar autenticación y rol al cargar
         auth.onAuthStateChanged(async function(user) {
             if (!user) {
-                // No hay usuario logueado
                 window.location.href = "../../login.html";
                 return;
             }
 
             try {
-                // Obtener datos del usuario
                 const userDoc = await db.collection("usuarios").doc(user.uid).get();
                 if (!userDoc.exists) {
                     document.getElementById('mensaje-verificacion').innerHTML = 
@@ -133,10 +131,8 @@
                 document.getElementById('mensaje-verificacion').innerHTML = 
                     `<div class="alert alert-success">✅ Sesión iniciada como: <strong>${nombres} ${apellidos}</strong> (${rol === 'admin' ? 'Administrador' : 'Administración Académica'})</div>`;
 
-                // Generar menú
+                // Generar menú y contenido
                 generarMenu(rol);
-
-                // Generar contenido
                 generarContenido(nombres, apellidos, rol);
 
             } catch (error) {
@@ -154,26 +150,42 @@
                         <i class="bi bi-journal-text"></i> Inicio
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="asignaturas/gestionar.html">
-                        <i class="bi bi-book"></i> Gestionar Asignaturas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="grupos/crear.html">
-                        <i class="bi bi-people-fill"></i> Gestionar Grupos
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="matriculas/gestionar.html">
-                        <i class="bi bi-pencil-square"></i> Gestionar Matrículas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../../estudiantes/inicio.html">
-                        <i class="bi bi-mortarboard"></i> Gestionar Estudiantes
-                    </a>
-                </li>
+            `;
+
+            if (rol === 'admin') {
+                html += `
+                    <li class="nav-item">
+                        <a class="nav-link" href="asignaturas/gestionar.html">
+                            <i class="bi bi-book"></i> Gestionar Asignaturas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="grupos/crear.html">
+                            <i class="bi bi-people-fill"></i> Gestionar Grupos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="matriculas/gestionar.html">
+                            <i class="bi bi-pencil-square"></i> Gestionar Matrículas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../estudiantes/inicio.html">
+                            <i class="bi bi-mortarboard"></i> Gestionar Estudiantes
+                        </a>
+                    </li>
+                `;
+            } else if (rol === 'admin_academico') {
+                html += `
+                    <li class="nav-item">
+                        <a class="nav-link" href="matriculas/gestionar.html">
+                            <i class="bi bi-pencil-square"></i> Gestionar Matrículas
+                        </a>
+                    </li>
+                `;
+            }
+
+            html += `
                 <li class="nav-item mt-4">
                     <a class="nav-link text-warning" href="../../dashboard.html">
                         <i class="bi bi-arrow-left"></i> Volver al Panel
@@ -185,6 +197,7 @@
                     </a>
                 </li>
             `;
+
             menu.innerHTML = html;
         }
 
@@ -208,88 +221,114 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Cuadritos de acceso rápido -->
-                <div class="row g-4 justify-content-center">
-                    <!-- Tomar Asistencia -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="asistencias/tomar.html" class="text-decoration-none">
-                            <div class="card card-quick bg-asistencia">
-                                <div class="card-body">
-                                    <i class="bi bi-check-circle"></i>
-                                    <h5>Tomar Asistencia</h5>
-                                    <p>Registra la asistencia de estudiantes por grupo y clase</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Reportes de Asistencia -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
-                            <div class="card card-quick bg-info text-white">
-                                <div class="card-body">
-                                    <i class="bi bi-file-earmark-bar-graph"></i>
-                                    <h5>Reportes de Asistencia</h5>
-                                    <p>(Temporalmente desactivado)</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Ingreso de Notas -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="notas/ingresar.html" class="text-decoration-none">
-                            <div class="card card-quick bg-notas">
-                                <div class="card-body">
-                                    <i class="bi bi-clipboard2-check"></i>
-                                    <h5>Ingreso de Notas</h5>
-                                    <p>Ingresa calificaciones de tareas, exámenes y asistencia</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Reportes de Notas -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
-                            <div class="card card-quick bg-success text-white">
-                                <div class="card-body">
-                                    <i class="bi bi-graph-up"></i>
-                                    <h5>Reportes de Notas</h5>
-                                    <p>(Temporalmente desactivado)</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Gestión de Pagos -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="pagos/gestionar.html" class="text-decoration-none">
-                            <div class="card card-quick bg-pagos">
-                                <div class="card-body">
-                                    <i class="bi bi-credit-card"></i>
-                                    <h5>Gestión de Pagos</h5>
-                                    <p>Registra pagos de matrícula, mensualidades y emite recibos</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <!-- Gestionar Estudiantes -->
-                    <div class="col-md-6 col-lg-4">
-                        <a href="../../estudiantes/inicio.html" class="text-decoration-none">
-                            <div class="card card-quick bg-estudiantes">
-                                <div class="card-body">
-                                    <i class="bi bi-mortarboard"></i>
-                                    <h5>Gestionar Estudiantes</h5>
-                                    <p>Administra la matrícula, datos y historial de estudiantes</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
             `;
+
+            if (rol === 'admin') {
+                contenido += `
+                    <div class="row g-4 justify-content-center">
+                        <!-- Gestionar Estudiantes -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="../../estudiantes/inicio.html" class="text-decoration-none">
+                                <div class="card card-quick bg-estudiantes">
+                                    <div class="card-body">
+                                        <i class="bi bi-mortarboard"></i>
+                                        <h5>Gestionar Estudiantes</h5>
+                                        <p>Administra la matrícula, datos y historial de estudiantes</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Gestión de Pagos -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="pagos/gestionar.html" class="text-decoration-none">
+                                <div class="card card-quick bg-pagos">
+                                    <div class="card-body">
+                                        <i class="bi bi-credit-card"></i>
+                                        <h5>Gestión de Pagos</h5>
+                                        <p>Registra pagos de matrícula, mensualidades y emite recibos</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Gestión de Notas -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="notas/ingresar.html" class="text-decoration-none">
+                                <div class="card card-quick bg-notas">
+                                    <div class="card-body">
+                                        <i class="bi bi-clipboard2-check"></i>
+                                        <h5>Gestión de Notas</h5>
+                                        <p>Ingresa calificaciones de tareas, exámenes y asistencia</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Gestión de Asistencias -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="asistencias/tomar.html" class="text-decoration-none">
+                                <div class="card card-quick bg-asistencia">
+                                    <div class="card-body">
+                                        <i class="bi bi-check-circle"></i>
+                                        <h5>Gestión de Asistencias</h5>
+                                        <p>Registra la asistencia de estudiantes por grupo y clase</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Reportes de Notas -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
+                                <div class="card card-quick bg-success text-white">
+                                    <div class="card-body">
+                                        <i class="bi bi-graph-up"></i>
+                                        <h5>Reporte de Notas</h5>
+                                        <p>(Temporalmente desactivado)</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Reportes de Asistencia -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
+                                <div class="card card-quick bg-info text-white">
+                                    <div class="card-body">
+                                        <i class="bi bi-file-earmark-bar-graph"></i>
+                                        <h5>Reporte de Asistencias</h5>
+                                        <p>(Temporalmente desactivado)</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (rol === 'admin_academico') {
+                contenido += `
+                    <div class="row g-4 justify-content-center">
+                        <!-- Solo Gestionar Matrículas -->
+                        <div class="col-md-6 col-lg-4">
+                            <a href="matriculas/gestionar.html" class="text-decoration-none">
+                                <div class="card card-quick" style="background: linear-gradient(135deg, #ff6f00, #ffa000); color: white;">
+                                    <div class="card-body">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <h5>Gestión de Matrículas</h5>
+                                        <p>Administra inscripciones, estados y registros académicos</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Como Administrador Académico, solo tienes acceso a la gestión de matrículas.
+                        </div>
+                    </div>
+                `;
+            }
+
             document.getElementById('contenido-dinamico').innerHTML = contenido;
         }
     </script>
