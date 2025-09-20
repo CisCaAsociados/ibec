@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Login - IBEC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -27,7 +28,7 @@
             height: auto;
         }
         .brand-bar {
-            background-color: #003366; /* Azul oscuro, como el logo */
+            background-color: #003366;
             color: white;
             text-align: center;
             padding: 12px 0;
@@ -54,62 +55,102 @@
         .btn-primary:hover {
             background-color: #002244;
         }
+        #mensaje {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Contenedor principal -->
+
     <div class="login-container">
-        
-        <!-- Logo -->
         <div class="logo-container">
             <img src="img/Logo_Ibec.png" alt="Logo IBEC">
         </div>
-
-        <!-- Franja azul con texto -->
         <div class="brand-bar">
             SISTEMA IBEC
         </div>
-
-        <!-- Tarjeta de login -->
         <div class="card shadow-sm">
             <div class="card-body">
                 <h4 class="text-center mb-4"><i class="bi bi-lock"></i> Iniciar Sesión</h4>
 
-                <!-- Mensajes de error -->
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger alert-sm mb-4">
-                        <?php if ($_GET['error'] == 'vacios'): ?>
-                            Completa todos los campos.
-                        <?php elseif ($_GET['error'] == 'credenciales'): ?>
-                            Email o contraseña incorrectos.
-                        <?php else: ?>
-                            Error técnico. Intenta nuevamente.
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                <!-- Aquí mostraremos mensajes de error o éxito -->
+                <div id="mensaje"></div>
 
-                <!-- Formulario -->
-                <form action="auth/login_proceso.php" method="POST">
+                <form id="loginForm">
                     <div class="mb-3">
                         <label class="form-label">Correo Electrónico</label>
-                        <input type="email" name="email" class="form-control" placeholder="tucorreo@ibec.edu" required>
+                        <input type="email" id="email" class="form-control" placeholder="tucorreo@ibec.edu" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-control" required>
+                        <input type="password" id="password" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                 </form>
+
+                <div class="text-center mt-3">
+                    <small>¿No tienes cuenta? <a href="#" id="irRegistro">Regístrate</a></small>
+                </div>
             </div>
         </div>
-
-        <!-- Pie: Nombre del instituto -->
         <div class="footer-instituto">
             INSTITUTO BÍBLICO EL CAMINO
         </div>
     </div>
 
-    <!-- Bootstrap JS (opcional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+    <script>
+        // Pega aquí tu configuración de Firebase (solo para pruebas locales o privadas)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Manejar el formulario
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const mensajeDiv = document.getElementById('mensaje');
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login exitoso
+                    mensajeDiv.innerHTML = '<div class="alert alert-success">¡Bienvenido! Redirigiendo...</div>';
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html"; // Cambia esto por tu página principal
+                    }, 1500);
+                })
+                .catch((error) => {
+                    let msg = "Error técnico. Intenta nuevamente.";
+                    if (error.code === 'auth/invalid-credential') {
+                        msg = "Email o contraseña incorrectos.";
+                    } else if (error.code === 'auth/missing-password' || error.code === 'auth/missing-email') {
+                        msg = "Completa todos los campos.";
+                    }
+                    mensajeDiv.innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+                });
+        });
+
+        // Opcional: link para registro (si quieres crear usuarios)
+        document.getElementById('irRegistro').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Aquí podrías redirigir a register.html o abrir un modal
+            alert("Función de registro aún no implementada.");
+        });
+    </script>
+
 </body>
 </html>
