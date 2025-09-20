@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar Asignaturas - IBEC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-top: 20px; }
+        .table th { background-color: #343a40; color: white; }
+        .badge { font-size: 0.85em; }
+        #mensaje { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+
+                <!-- Título -->
+                <h2 class="text-center my-4">
+                    <i class="bi bi-book"></i> Gestión de Asignaturas
+                </h2>
+
+                <!-- Mensaje -->
+                <div id="mensaje"></div>
+
+                <!-- Botones de navegación -->
+                <div class="d-flex justify-content-between mb-3">
+                    <a href="../inicio.html" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver al Panel Académico
+                    </a>
+                    <a href="../../carreras/gestionar.html" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-mortarboard"></i> Gestionar Carreras
+                    </a>
+                </div>
+
+                <!-- Filtro por carrera -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <form id="filtroForm" class="row g-3">
+                            <div class="col-md-10">
+                                <label class="form-label"><i class="bi bi-filter"></i> Filtrar por Carrera</label>
+                                <select id="carreraFiltro" name="carrera" class="form-control">
+                                    <option value="">Todas las carreras</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Formulario de Creación -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5>➕ Crear Nueva Asignatura</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="crearForm">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label>Código *</label>
+                                    <input type="text" id="codigoCrear" name="codigo" class="form-control" placeholder="101, 201..." pattern="\d{3,4}" required>
+                                    <small class="text-muted">Ej: 101 → primera asignatura de la carrera 100</small>
+                                </div>
+                                <div class="col-md-9 mb-3">
+                                    <label>Nombre *</label>
+                                    <input type="text" id="nombreCrear" name="nombre" class="form-control" placeholder="Ej: Pentateuco" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Carrera *</label>
+                                <select id="carreraCrear" name="id_carrera" class="form-control" required>
+                                    <option value="">Seleccionar carrera</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Descripción</label>
+                                <textarea id="descripcionCrear" name="descripcion" class="form-control" rows="2" placeholder="Breve descripción de la asignatura..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Crear Asignatura</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Listado de Asignaturas -->
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white">
+                        <h5>📋 Asignaturas Registradas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="listadoAsignaturas">
+                            <p class="text-muted">Cargando asignaturas...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Configuración de Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV_UwzE7uPv67-3iR2Arv71fOL6fd1wdw",
+            authDomain: "ibec-login.firebaseapp.com",
+            projectId: "ibec-login",
+            storageBucket: "ibec-login.firebasestorage.app",
+            messagingSenderId: "616348709046",
+            appId: "1:616348709046:web:07e77e7e2fba90a0b57617",
+            measurementId: "G-0R13GPY97Z"
+        };
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+    <!-- Script principal -->
+    <script>
+        let asignaturas = [];
+        let carreras = [];
+
+        // Verificar autenticación y rol al cargar
+        auth.onAuthStateChanged(async function(user) {
+            if (!user) {
+                window.location.href = "../../../login.html";
+                return;
+            }
+
+            try {
+                const userDoc = await db.collection("usuarios").doc(user.uid).get();
+                if (!userDoc.exists) {
+                    mostrarMensaje('Usuario no encontrado en la base de datos.', 'danger');
+                    return;
+                }
+
+                const userData = userDoc.data();
+                const rol = userData.rol || 'invitado';
+
+                // Verificar permisos
+                if (rol !== 'admin' && rol !== 'admin_academico') {
+                    mostrarMensaje('No tienes permiso para acceder a esta sección.', 'warning');
+                    setTimeout(() => {
+                        window.location.href = "../../../dashboard.html";
+                    }, 3000);
+                    return;
+                }
+
+                // Cargar datos
+                await cargarCarreras();
+                await cargarAsignaturas();
+
+            } catch (error) {
+                console.error("Error:", error);
+                mostrarMensaje('Error al cargar la página. Intenta nuevamente.', 'danger');
+            }
+        });
+
+        // Cargar carreras desde Firestore
+        async function cargarCarreras() {
+            try {
+                const snapshot = await db.collection("carreras").where("activo", "==", true).orderBy("codigo").get();
+                carreras = [];
+                snapshot.forEach(doc => {
+                    carreras.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Llenar select de carreras en formulario de creación
+                const selectCrear = document.getElementById('carreraCrear');
+                selectCrear.innerHTML = '<option value="">Seleccionar carrera</option>';
+                carreras.forEach(carrera => {
+                    const option = document.createElement('option');
+                    option.value = carrera.id;
+                    option.textContent = `${carrera.codigo} - ${carrera.nombre}`;
+                    selectCrear.appendChild(option);
+                });
+
+                // Llenar select de filtro
+                const selectFiltro = document.getElementById('carreraFiltro');
+                selectFiltro.innerHTML = '<option value="">Todas las carreras</option>';
+                carreras.forEach(carrera => {
+                    const option = document.createElement('option');
+                    option.value = carrera.id;
+                    option.textContent = `${carrera.codigo} - ${carrera.nombre}`;
+                    selectFiltro.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("Error al cargar carreras:", error);
+            }
+        }
+
+        // Cargar asignaturas desde Firestore
+        async function cargarAsignaturas() {
+            try {
+                let query = db.collection("asignaturas").orderBy("codigo");
+                const carreraFiltro = document.getElementById('carreraFiltro').value;
+                
+                if (carreraFiltro) {
+                    query = query.where("id_carrera", "==", carreraFiltro);
+                }
+
+                const snapshot = await query.get();
+                asignaturas = [];
+                snapshot.forEach(doc => {
+                    asignaturas.push({ id: doc.id, ...doc.data() });
+                });
+
+                mostrarListadoAsignaturas();
+
+            } catch (error) {
+                console.error("Error al cargar asignaturas:", error);
+                mostrarMensaje('Error al cargar las asignaturas.', 'danger');
+            }
+        }
+
+        // Mostrar listado de asignaturas
+        function mostrarListadoAsignaturas() {
+            const container = document.getElementById('listadoAsignaturas');
+            
+            if (asignaturas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-emoji-frown" style="font-size: 3rem; color: #adb5bd;"></i>
+                        <h5 class="mt-3 text-muted">No hay asignaturas registradas.</h5>
+                        <p class="text-muted">Registra la primera asignatura desde el formulario superior.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Carrera</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            asignaturas.forEach(a => {
+                // Buscar nombre de la carrera
+                const carrera = carreras.find(c => c.id === a.id_carrera);
+                const carreraNombre = carrera ? carrera.nombre : 'Desconocida';
+
+                html += `
+                    <tr>
+                        <td class="fw-bold text-primary">${a.codigo}</td>
+                        <td>${a.nombre}</td>
+                        <td>${carreraNombre}</td>
+                        <td>
+                            ${a.activo ? 
+                                '<span class="badge bg-success">Activa</span>' : 
+                                '<span class="badge bg-secondary">Inactiva</span>'
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <!-- Editar -->
+                                <button type="button" class="btn btn-warning" onclick="abrirModalEditar('${a.id}', '${a.codigo}', '${a.nombre}', '${a.id_carrera}', '${a.descripcion || ''}')">
+                                    ✏️ Editar
+                                </button>
+
+                                <!-- Desactivar/Reactivar -->
+                                ${a.activo ? 
+                                    `<button type="button" class="btn btn-danger" onclick="desactivarAsignatura('${a.id}', '${a.nombre}')">🗑️ Desactivar</button>` : 
+                                    `<button type="button" class="btn btn-secondary" onclick="reactivarAsignatura('${a.id}', '${a.nombre}')">🔄 Reactivar</button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Mostrar mensaje
+        function mostrarMensaje(texto, tipo) {
+            const mensajeDiv = document.getElementById('mensaje');
+            mensajeDiv.innerHTML = `<div class="alert alert-${tipo} text-center">${texto}</div>`;
+            setTimeout(() => {
+                mensajeDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Manejar formulario de creación
+        document.getElementById('crearForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const codigo = document.getElementById('codigoCrear').value.trim();
+            const nombre = document.getElementById('nombreCrear').value.trim();
+            const id_carrera = document.getElementById('carreraCrear').value;
+            const descripcion = document.getElementById('descripcionCrear').value.trim();
+
+            if (!codigo || !nombre || !id_carrera) {
+                mostrarMensaje('Todos los campos son obligatorios.', 'warning');
+                return;
+            }
+
+            if (!/^\d{3,4}$/.test(codigo)) {
+                mostrarMensaje('El código debe ser numérico y de 3 o 4 dígitos (ej: 101, 201).', 'warning');
+                return;
+            }
+
+            try {
+                // Verificar si ya existe una asignatura con ese código
+                const snapshot = await db.collection("asignaturas")
+                    .where("codigo", "==", codigo)
+                    .where("activo", "==", true)
+                    .get();
+
+                if (!snapshot.empty) {
+                    mostrarMensaje(`Ya existe una asignatura activa con el código <strong>${codigo}</strong>.`, 'warning');
+                    return;
+                }
+
+                // Crear nueva asignatura
+                await db.collection("asignaturas").add({
+                    codigo: codigo,
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    id_carrera: id_carrera,
+                    activo: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                mostrarMensaje(`✅ Asignatura <strong>${nombre}</strong> creada con éxito.`, 'success');
+                
+                // Limpiar formulario
+                document.getElementById('crearForm').reset();
+                
+                // Recargar listado
+                await cargarAsignaturas();
+
+            } catch (error) {
+                console.error("Error al crear asignatura:", error);
+                mostrarMensaje('Error al crear la asignatura.', 'danger');
+            }
+        });
+
+        // Manejar filtro
+        document.getElementById('filtroForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await cargarAsignaturas();
+        });
+
+        // Función para abrir modal de edición
+        function abrirModalEditar(id, codigo, nombre, id_carrera, descripcion) {
+            // Creamos un modal dinámico
+            const modalHTML = `
+                <div class="modal fade" id="editarModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="editarForm">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Editar Asignatura: ${codigo}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="cerrarModal()"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="idEditar" value="${id}">
+                                    <div class="mb-3">
+                                        <label>Código</label>
+                                        <input type="text" id="codigoEditar" class="form-control" value="${codigo}" pattern="\\d{3,4}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Nombre</label>
+                                        <input type="text" id="nombreEditar" class="form-control" value="${nombre}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Carrera</label>
+                                        <select id="carreraEditar" class="form-control" required>
+                                            ${generarOpcionesCarreras(id_carrera)}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Descripción</label>
+                                        <textarea id="descripcionEditar" class="form-control" rows="2">${descripcion}</textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cerrarModal()">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Añadir modal al body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Inicializar modal
+            const modalElement = document.getElementById('editarModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            // Manejar formulario de edición
+            document.getElementById('editarForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const id_asignatura = document.getElementById('idEditar').value;
+                const codigo = document.getElementById('codigoEditar').value.trim();
+                const nombre = document.getElementById('nombreEditar').value.trim();
+                const id_carrera = document.getElementById('carreraEditar').value;
+                const descripcion = document.getElementById('descripcionEditar').value.trim();
+
+                if (!codigo || !nombre || !id_carrera) {
+                    mostrarMensaje('Todos los campos son obligatorios.', 'warning');
+                    return;
+                }
+
+                if (!/^\d{3,4}$/.test(codigo)) {
+                    mostrarMensaje('El código debe ser numérico y de 3 o 4 dígitos.', 'warning');
+                    return;
+                }
+
+                try {
+                    // Verificar si ya existe otra asignatura con ese código
+                    const snapshot = await db.collection("asignaturas")
+                        .where("codigo", "==", codigo)
+                        .where("id", "!=", id_asignatura)
+                        .where("activo", "==", true)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        mostrarMensaje(`Ya existe otra asignatura activa con el código <strong>${codigo}</strong>.`, 'warning');
+                        return;
+                    }
+
+                    // Actualizar asignatura
+                    await db.collection("asignaturas").doc(id_asignatura).update({
+                        codigo: codigo,
+                        nombre: nombre,
+                        descripcion: descripcion,
+                        id_carrera: id_carrera,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    mostrarMensaje(`✏️ Asignatura <strong>${nombre}</strong> actualizada.`, 'primary');
+                    
+                    // Cerrar modal
+                    modal.hide();
+                    
+                    // Eliminar modal del DOM después de cerrar
+                    modalElement.addEventListener('hidden.bs.modal', function() {
+                        modalElement.remove();
+                    });
+                    
+                    // Recargar listado
+                    await cargarAsignaturas();
+
+                } catch (error) {
+                    console.error("Error al actualizar asignatura:", error);
+                    mostrarMensaje('Error al actualizar la asignatura.', 'danger');
+                }
+            });
+
+            // Mostrar modal
+            modal.show();
+        }
+
+        // Función para generar opciones de carreras
+        function generarOpcionesCarreras(selectedId) {
+            let html = '';
+            carreras.forEach(carrera => {
+                const selected = carrera.id === selectedId ? 'selected' : '';
+                html += `<option value="${carrera.id}" ${selected}>${carrera.codigo} - ${carrera.nombre}</option>`;
+            });
+            return html;
+        }
+
+        // Función para cerrar modal
+        function cerrarModal() {
+            const modalElement = document.getElementById('editarModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    modalElement.remove();
+                });
+            }
+        }
+
+        // Función para desactivar asignatura
+        async function desactivarAsignatura(id, nombre) {
+            if (!confirm(`¿Desactivar la asignatura "${nombre}"?`)) {
+                return;
+            }
+
+            try {
+                await db.collection("asignaturas").doc(id).update({
+                    activo: false,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                mostrarMensaje('🗑️ Asignatura desactivada.', 'secondary');
+                await cargarAsignaturas();
+
+            } catch (error) {
+                console.error("Error al desactivar asignatura:", error);
+                mostrarMensaje('Error al desactivar la asignatura.', 'danger');
+            }
+        }
+
+        // Función para reactivar asignatura
+        async function reactivarAsignatura(id, nombre) {
+            try {
+                await db.collection("asignaturas").doc(id).update({
+                    activo: true,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                mostrarMensaje('🔄 Asignatura reactivada.', 'success');
+                await cargarAsignaturas();
+
+            } catch (error) {
+                console.error("Error al reactivar asignatura:", error);
+                mostrarMensaje('Error al reactivar la asignatura.', 'danger');
+            }
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
