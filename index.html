@@ -1,6 +1,3 @@
-<!-- En el <head> o antes de tu <script> -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -31,12 +28,12 @@
     <!-- Contenedor principal -->
     <div class="container-fluid">
         <div class="row">
-            <!-- Menú Lateral (se generará dinámicamente) -->
+            <!-- Menú Lateral -->
             <nav id="sidebar" class="col-md-3 col-lg-2 sidebar">
                 <div class="position-sticky pt-3">
                     <h5 class="text-white text-center py-3 border-bottom">IBEC</h5>
                     <ul id="menu-dinamico" class="nav flex-column">
-                        <!-- Se llenará con JS -->
+                        <!-- Se llenará con JavaScript -->
                     </ul>
                 </div>
             </nav>
@@ -46,9 +43,9 @@
                 <!-- Mensaje de bienvenida o error -->
                 <div id="mensaje-bienvenida"></div>
 
-                <!-- Aquí se cargará el contenido dinámico -->
+                <!-- Contenido dinámico -->
                 <div id="contenido-dinamico">
-                    <p>Cargando...</p>
+                    <p class="text-muted">Cargando información del usuario...</p>
                 </div>
 
                 <!-- Pie de página -->
@@ -59,20 +56,22 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- ✅ Firebase SDK (SIN ESPACIOS) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <!-- Tu configuración de Firebase (la moveremos a un archivo separado después) -->
+    <!-- ✅ CONFIGURACIÓN DE FIREBASE — PEGA AQUÍ TUS DATOS REALES -->
     <script>
+        // ⚠️ ⚠️ ⚠️ PEGA TU CONFIGURACIÓN REAL DESDE FIREBASE CONSOLE AQUÍ ⚠️ ⚠️ ⚠️
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "tu-proyecto.firebaseapp.com",
-            projectId: "tu-proyecto",
-            storageBucket: "tu-proyecto.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abc123def456"
+           apiKey: "AIzaSyCV_UwzE7uPv67-3iR2Arv71fOL6fd1wdw",
+          authDomain: "ibec-login.firebaseapp.com",
+          projectId: "ibec-login",
+          storageBucket: "ibec-login.firebasestorage.app",
+          messagingSenderId: "616348709046",
+          appId: "1:616348709046:web:07e77e7e2fba90a0b57617",
+          measurementId: "G-0R13GPY97Z"
         };
 
         // Inicializar Firebase
@@ -81,22 +80,22 @@
         const db = firebase.firestore();
     </script>
 
-    <!-- Script principal del dashboard -->
+    <!-- ✅ Script principal del dashboard -->
     <script>
         // Verificar autenticación al cargar
         auth.onAuthStateChanged(async function(user) {
             if (!user) {
-                // Si no hay usuario logueado, redirigir al login
+                // Redirigir al login si no hay sesión
                 window.location.href = "index.html";
                 return;
             }
 
             try {
-                // Obtener datos adicionales del usuario desde Firestore
+                // Obtener datos del usuario desde Firestore
                 const userDoc = await db.collection("usuarios").doc(user.uid).get();
                 if (!userDoc.exists) {
                     document.getElementById('mensaje-bienvenida').innerHTML = 
-                        '<div class="alert alert-danger">Usuario no encontrado en la base de datos.</div>';
+                        '<div class="alert alert-danger">⚠️ Usuario no encontrado en la base de datos. Contacta al administrador.</div>';
                     return;
                 }
 
@@ -108,18 +107,16 @@
 
                 // Mostrar mensaje de bienvenida
                 document.getElementById('mensaje-bienvenida').innerHTML = 
-                    `<div class="alert alert-success">¡Bienvenido, ${nombres} ${apellidos}!</div>`;
+                    `<div class="alert alert-success">✅ ¡Bienvenido, <strong>${nombres} ${apellidos}</strong>!</div>`;
 
-                // Generar menú lateral según rol
+                // Generar menú y contenido
                 generarMenu(rol);
-
-                // Generar contenido principal según rol
                 generarContenido(rol, nombres, apellidos, codigo);
 
             } catch (error) {
-                console.error("Error al cargar datos del usuario:", error);
+                console.error("Error al cargar datos:", error);
                 document.getElementById('mensaje-bienvenida').innerHTML = 
-                    '<div class="alert alert-danger">Error al cargar tus datos. Intenta nuevamente.</div>';
+                    '<div class="alert alert-danger">❌ Error al cargar tus datos. Recarga la página o intenta más tarde.</div>';
             }
         });
 
@@ -296,7 +293,6 @@
             }
 
             contenido += '</div>';
-
             document.getElementById('contenido-dinamico').innerHTML = contenido;
         }
 
@@ -324,4 +320,3 @@
 
 </body>
 </html>
-
