@@ -104,14 +104,15 @@
 
     <script>
         // Pega aquí tu configuración de Firebase (solo para pruebas locales o privadas)
-        const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "tu-proyecto.firebaseapp.com",
-            projectId: "tu-proyecto",
-            storageBucket: "tu-proyecto.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abc123def456"
-        };
+ const firebaseConfig = {
+  apiKey: "AIzaSyCV_UwzE7uPv67-3iR2Arv71fOL6fd1wdw",
+  authDomain: "ibec-login.firebaseapp.com",
+  projectId: "ibec-login",
+  storageBucket: "ibec-login.firebasestorage.app",
+  messagingSenderId: "616348709046",
+  appId: "1:616348709046:web:07e77e7e2fba90a0b57617",
+  measurementId: "G-0R13GPY97Z"
+};
 
         // Inicializar Firebase
         const app = firebase.initializeApp(firebaseConfig);
