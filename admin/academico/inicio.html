@@ -309,96 +309,109 @@
                         </div>
                     </div>
                 `;
-            } else if (rol === 'admin_academico') {
-                // Admin Académico ve SOLO estos 6 cuadritos + gestión de matrículas
-                contenido += `
-                    <div class="row g-4 justify-content-center">
-                        <!-- Gestionar Estudiantes -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="../../estudiantes/inicio.html" class="text-decoration-none">
-                                <div class="card card-quick bg-estudiantes">
-                                    <div class="card-body">
-                                        <i class="bi bi-mortarboard"></i>
-                                        <h5>Gestionar Estudiantes</h5>
-                                        <p>Administra la matrícula, datos y historial de estudiantes</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Gestión de Pagos -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="pagos/gestionar.html" class="text-decoration-none">
-                                <div class="card card-quick bg-pagos">
-                                    <div class="card-body">
-                                        <i class="bi bi-credit-card"></i>
-                                        <h5>Gestión de Pagos</h5>
-                                        <p>Registra pagos de matrícula, mensualidades y emite recibos</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Gestión de Notas -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="notas/ingresar.html" class="text-decoration-none">
-                                <div class="card card-quick bg-notas">
-                                    <div class="card-body">
-                                        <i class="bi bi-clipboard2-check"></i>
-                                        <h5>Gestión de Notas</h5>
-                                        <p>Ingresa calificaciones de tareas, exámenes y asistencia</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Gestión de Asistencias -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="asistencias/tomar.html" class="text-decoration-none">
-                                <div class="card card-quick bg-asistencia">
-                                    <div class="card-body">
-                                        <i class="bi bi-check-circle"></i>
-                                        <h5>Gestión de Asistencias</h5>
-                                        <p>Registra la asistencia de estudiantes por grupo y clase</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Reportes de Notas -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
-                                <div class="card card-quick bg-success text-white">
-                                    <div class="card-body">
-                                        <i class="bi bi-graph-up"></i>
-                                        <h5>Reporte de Notas</h5>
-                                        <p>(Temporalmente desactivado)</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Reportes de Asistencia -->
-                        <div class="col-md-6 col-lg-4">
-                            <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
-                                <div class="card card-quick bg-info text-white">
-                                    <div class="card-body">
-                                        <i class="bi bi-file-earmark-bar-graph"></i>
-                                        <h5>Reporte de Asistencias</h5>
-                                        <p>(Temporalmente desactivado)</p>
-                                    </div>
-                                </div>
-                            </a>
+} else if (rol === 'admin_academico') {
+    // Admin Académico ve GESTIÓN DE MATRÍCULAS + los 6 cuadritos que pediste
+    contenido += `
+        <div class="row g-4 justify-content-center">
+            <!-- 📝 GESTIÓN DE MATRÍCULAS (Nuevo cuadrito bonito) -->
+            <div class="col-md-6 col-lg-4">
+                <a href="matriculas/gestionar.html" class="text-decoration-none">
+                    <div class="card card-quick bg-matriculas">
+                        <div class="card-body">
+                            <i class="bi bi-pencil-square"></i>
+                            <h5>Gestión de Matrículas</h5>
+                            <p>Administra inscripciones, estados y registros académicos</p>
                         </div>
                     </div>
+                </a>
+            </div>
 
-                    <div class="text-center mt-4">
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Como Administrador Académico, tienes acceso a gestión de estudiantes, pagos, notas, asistencias y reportes.
+            <!-- 🟦 Gestionar Estudiantes -->
+            <div class="col-md-6 col-lg-4">
+                <a href="../../estudiantes/inicio.html" class="text-decoration-none">
+                    <div class="card card-quick bg-estudiantes">
+                        <div class="card-body">
+                            <i class="bi bi-mortarboard"></i>
+                            <h5>Gestionar Estudiantes</h5>
+                            <p>Administra la matrícula, datos y historial de estudiantes</p>
                         </div>
                     </div>
-                `;
-            }
+                </a>
+            </div>
+
+            <!-- 🟧 Gestión de Pagos -->
+            <div class="col-md-6 col-lg-4">
+                <a href="pagos/gestionar.html" class="text-decoration-none">
+                    <div class="card card-quick bg-pagos">
+                        <div class="card-body">
+                            <i class="bi bi-credit-card"></i>
+                            <h5>Gestión de Pagos</h5>
+                            <p>Registra pagos de matrícula, mensualidades y emite recibos</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 🟪 Gestión de Notas -->
+            <div class="col-md-6 col-lg-4">
+                <a href="notas/ingresar.html" class="text-decoration-none">
+                    <div class="card card-quick bg-notas">
+                        <div class="card-body">
+                            <i class="bi bi-clipboard2-check"></i>
+                            <h5>Gestión de Notas</h5>
+                            <p>Ingresa calificaciones de tareas, exámenes y asistencia</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 🟩 Gestión de Asistencias -->
+            <div class="col-md-6 col-lg-4">
+                <a href="asistencias/tomar.html" class="text-decoration-none">
+                    <div class="card card-quick bg-asistencia">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle"></i>
+                            <h5>Gestión de Asistencias</h5>
+                            <p>Registra la asistencia de estudiantes por grupo y clase</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- ✅ Reportes de Notas -->
+            <div class="col-md-6 col-lg-4">
+                <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
+                    <div class="card card-quick bg-success text-white">
+                        <div class="card-body">
+                            <i class="bi bi-graph-up"></i>
+                            <h5>Reporte de Notas</h5>
+                            <p>(Temporalmente desactivado)</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 📊 Reportes de Asistencia -->
+            <div class="col-md-6 col-lg-4">
+                <a href="javascript:void(0)" onclick="alert('En desarrollo. Pronto disponible.')" class="text-decoration-none">
+                    <div class="card card-quick bg-info text-white">
+                        <div class="card-body">
+                            <i class="bi bi-file-earmark-bar-graph"></i>
+                            <h5>Reporte de Asistencias</h5>
+                            <p>(Temporalmente desactivado)</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Como Administrador Académico, tienes acceso completo a gestión académica.
+            </div>
+        </div>
+    `;
+}
 
             document.getElementById('contenido-dinamico').innerHTML = contenido;
         }
